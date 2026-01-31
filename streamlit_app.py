@@ -4,19 +4,26 @@ import random
 # --- KONFIGURATION ---
 st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="centered")
 
-# --- PARTEI-DATEN & FARBEN ---
+# --- PARTEI-DATEN & FARBEN (Final abgeglichen) ---
 PARTIES = ["GRÜNE", "CDU", "SPD", "FDP", "AfD", "BSW"]
 PARTY_COLORS = {
     "GRÜNE": "#64A12D", "CDU": "#323232", "SPD": "#E3000F",
     "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44"
 }
 
+# Skala: ++=2, +=1, o=0, -= -1, --= -2
 PARTY_DATA = {
-    "GRÜNE": [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 1],
-    "CDU":   [1, 2, 2, 2, 1, 1, 2, -1, 2, 1, 2, -2, 2, -1, 2, 0, 1, -1, 1, -1, 1, -1, 0, 2, -1],
-    "SPD":   [2, 1, 0, 1, 1, 1, 1, -1, 0, -1, 1, -1, 1, 1, 1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1],
-    "FDP":   [1, 2, -1, 1, 2, 1, 0, 0, -1, 2, 1, -2, -1, 1, -1, -1, 1, 0, 2, -1, 1, 1, -1, 1, -1],
-    "AfD":   [1, 2, -2, 2, 2, 0, 2, -2, 2, -1, 2, -2, 2, -2, 2, -2, 1, -2, 2, 1, 1, -2, -2, 2, 0],
+    # GRÜNE: Fokus auf Klima, G8-Tradition, gegen Gender-Verbot
+    "GRÜNE": [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 2],
+    # CDU: Fokus auf Wirtschaft, Sicherheit, G9-Ja, gegen Mietendeckel
+    "CDU":   [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, 2, -1, 1, -1, 0, 2, -1],
+    # SPD: Fokus auf Soziales, G9-Push, gegen Gender-Verbot, für Mietendeckel
+    "SPD":   [2, 0, 1, 1, 0, 2, 1, -1, 0, 2, 1, 2, -1, 2, 2, 1, 2, -1, 1, 2, 1, 2, 1, 1, 2],
+    # FDP: Fokus auf Freiheit, Technologie, gegen Subventionen/Verbote
+    "FDP":   [1, 2, -1, 2, 2, 1, 0, -1, 1, 2, 1, -2, -2, -1, 2, -1, 1, 0, 2, -2, 2, 1, -1, 1, -2],
+    # AfD: Fokus auf Migration, Verbrenner, Kernkraft, konservative Werte
+    "AfD":   [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 1, 1, -2, -2, 2, 0],
+    # BSW: Fokus auf Soziales, Industriepolitik, Migration kritisch
     "BSW":   [1, 1, -1, 1, 0, 1, 0, -1, 0, 0, 1, 2, 1, 1, 1, 0, 1, -1, 1, 1, -1, 0, -1, 1, 2]
 }
 
@@ -49,20 +56,15 @@ DATA = [
     ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."]
 ]
 
-# --- SESSION STATE INITIALISIERUNG ---
+# --- LOGIK ---
 if 'order' not in st.session_state:
-    # Erzeuge eine zufällige Reihenfolge der Indizes 0 bis 24
     st.session_state.order = list(range(len(DATA)))
     random.shuffle(st.session_state.order)
     st.session_state.step = 0
-    st.session_state.choices = [] # Speichert {index, dir, weight}
+    st.session_state.choices = []
 
 def handle(original_index, direction, weight):
-    st.session_state.choices.append({
-        "index": original_index, 
-        "dir": direction, 
-        "weight": weight
-    })
+    st.session_state.choices.append({"index": original_index, "dir": direction, "weight": weight})
     st.session_state.step += 1
 
 def render_bar(name, pct, color):
@@ -74,11 +76,10 @@ def render_bar(name, pct, color):
 st.title("🗳️ Wahl-O-Mat BW 2026")
 
 if st.session_state.step < len(DATA):
-    # Hole den aktuellen Index aus der gemischten Liste
     current_idx = st.session_state.order[st.session_state.step]
     h, t, i = DATA[current_idx]
     
-    st.write(f"**These {st.session_state.step + 1} von 25** (Zufällige Auswahl)")
+    st.write(f"**These {st.session_state.step + 1} von 25**")
     st.progress(st.session_state.step / 25)
     
     st.markdown(f"## {h}")
@@ -96,36 +97,33 @@ if st.session_state.step < len(DATA):
             handle(current_idx, dr, wt)
             st.rerun()
     
-    st.caption("✅✅/❌❌: Thema zählt doppelt. | ⚪: Neutral/Egal")
-    
     if st.session_state.step > 0:
         if st.button("⬅️ Zurück"):
             st.session_state.step -= 1
             st.session_state.choices.pop()
             st.rerun()
 else:
-    # KONFETTI REGEN
     st.balloons()
-    
     st.header("🎉 Dein Ergebnis")
-    st.write("Basierend auf deiner zufälligen Fragen-Reihenfolge:")
     
     results = {}
     for party in PARTIES:
         s, m = 0, 0
         for c in st.session_state.choices:
-            original_q_idx = c["index"]
-            p_val = PARTY_DATA[party][original_q_idx]
+            q_idx = c["index"]
+            p_val = PARTY_DATA[party][q_idx]
             p_dir = 1 if p_val > 0 else (-1 if p_val < 0 else 0)
-            s += (2 - abs(c["dir"] - p_dir)) * c["weight"]
+            
+            # Übereinstimmungspunkte
+            pts = 2 - abs(c["dir"] - p_dir)
+            s += pts * c["weight"]
             m += 2 * c["weight"]
         results[party] = round((s / m) * 100, 1)
     
     for p, v in dict(sorted(results.items(), key=lambda x: x[1], reverse=True)).items():
         render_bar(p, v, PARTY_COLORS[p])
     
-    if st.button("🔄 Test mit neuer Zufallsreihenfolge starten"):
-        # Reset der Session
+    if st.button("🔄 Neustart (Neu gewürfelt)"):
         st.session_state.order = list(range(len(DATA)))
         random.shuffle(st.session_state.order)
         st.session_state.step = 0
