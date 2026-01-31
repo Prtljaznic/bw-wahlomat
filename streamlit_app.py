@@ -5,26 +5,22 @@ import random
 st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="centered")
 
 # --- PARTEI-DATEN & FARBEN (Final abgeglichen) ---
-PARTIES = ["GRÜNE", "CDU", "SPD", "FDP", "AfD", "BSW"]
+PARTIES = ["GRÜNE", "CDU", "SPD", "FDP", "AfD", "BSW", "DIE LINKE"]
 PARTY_COLORS = {
     "GRÜNE": "#64A12D", "CDU": "#323232", "SPD": "#E3000F",
-    "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44"
+    "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44",
+    "DIE LINKE": "#BE3075"
 }
 
 # Skala: ++=2, +=1, o=0, -= -1, --= -2
 PARTY_DATA = {
-    # GRÜNE: Fokus auf Klima, G8-Tradition, gegen Gender-Verbot
-    "GRÜNE": [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 2],
-    # CDU: Fokus auf Wirtschaft, Sicherheit, G9-Ja, gegen Mietendeckel
-    "CDU":   [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, 2, -1, 1, -1, 0, 2, -1],
-    # SPD: Fokus auf Soziales, G9-Push, gegen Gender-Verbot, für Mietendeckel
-    "SPD":   [2, 0, 1, 1, 0, 2, 1, -1, 0, 2, 1, 2, -1, 2, 2, 1, 2, -1, 1, 2, 1, 2, 1, 1, 2],
-    # FDP: Fokus auf Freiheit, Technologie, gegen Subventionen/Verbote
-    "FDP":   [1, 2, -1, 2, 2, 1, 0, -1, 1, 2, 1, -2, -2, -1, 2, -1, 1, 0, 2, -2, 2, 1, -1, 1, -2],
-    # AfD: Fokus auf Migration, Verbrenner, Kernkraft, konservative Werte
-    "AfD":   [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 1, 1, -2, -2, 2, 0],
-    # BSW: Fokus auf Soziales, Industriepolitik, Migration kritisch
-    "BSW":   [1, 1, -1, 1, 0, 1, 0, -1, 0, 0, 1, 2, 1, 1, 1, 0, 1, -1, 1, 1, -1, 0, -1, 1, 2]
+    "GRÜNE":    [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 2],
+    "CDU":      [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, 2, -1, 1, -1, 0, 2, -1],
+    "SPD":      [2, 0, 1, 1, 0, 2, 1, -1, 0, 2, 1, 2, -1, 2, 2, 1, 2, -1, 1, 2, 1, 2, 1, 1, 2],
+    "FDP":      [1, 2, -1, 2, 2, 1, 0, -1, 1, 2, 1, -2, -2, -1, 2, -1, 1, 0, 2, -2, 2, 1, -1, 1, -2],
+    "AfD":      [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 2, 0, -2, -2, 2, 0],
+    "BSW":      [1, 1, -1, 1, 0, 1, 0, -1, 0, 0, 1, 2, 1, 1, 1, 0, 1, -1, 1, 1, -1, 0, -1, 1, 2],
+    "DIE LINKE": [2, -2, 2, -2, -1, 2, -2, 2, -2, 2, -1, 2, -2, 1, -2, 2, 1, 2, -1, 2, 1, 2, 2, -1, 2]
 }
 
 # --- DATEN-STRUKTUR ---
@@ -56,7 +52,7 @@ DATA = [
     ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."]
 ]
 
-# --- LOGIK ---
+# --- SESSION STATE INITIALISIERUNG ---
 if 'order' not in st.session_state:
     st.session_state.order = list(range(len(DATA)))
     random.shuffle(st.session_state.order)
