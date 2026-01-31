@@ -4,7 +4,7 @@ import random
 # --- KONFIGURATION ---
 st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="centered")
 
-# --- PARTEI-DATEN & FARBEN (Final abgeglichen) ---
+# --- PARTEI-DATEN & FARBEN (Finaler Polit-Check 2026) ---
 PARTIES = ["GRÜNE", "CDU", "SPD", "FDP", "AfD", "BSW", "DIE LINKE"]
 PARTY_COLORS = {
     "GRÜNE": "#64A12D", "CDU": "#323232", "SPD": "#E3000F",
@@ -14,12 +14,19 @@ PARTY_COLORS = {
 
 # Skala: ++=2, +=1, o=0, -= -1, --= -2
 PARTY_DATA = {
+    # GRÜNE: Klima, Bildung, gegen Verbote von Gendersprache
     "GRÜNE":    [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 2],
+    # CDU: Wirtschaft, Sicherheit, G9-Ja, konservative Werte
     "CDU":      [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, 2, -1, 1, -1, 0, 2, -1],
+    # SPD: Soziales, Arbeit, G9-Push, für Mietendeckel
     "SPD":      [2, 0, 1, 1, 0, 2, 1, -1, 0, 2, 1, 2, -1, 2, 2, 1, 2, -1, 1, 2, 1, 2, 1, 1, 2],
-    "FDP":      [1, 2, -1, 2, 2, 1, 0, -1, 1, 2, 1, -2, -2, -1, 2, -1, 1, 0, 2, -2, 2, 1, -1, 1, -2],
+    # FDP (KORRIGIERT): Freiheit, gegen Gebührenabschaffung, gegen Solarzwang, pro Kernkraft
+    "FDP":      [1, 2, -1, 2, 2, 1, 1, -1, 2, 2, 1, -2, -1, -2, 2, -1, 2, -1, 2, -1, 1, -2, -2, 1, -2],
+    # AfD: Migration, Verbrenner, Kernkraft, Law & Order
     "AfD":      [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 2, 0, -2, -2, 2, 0],
+    # BSW: Soziale Gerechtigkeit kombiniert mit restriktiver Migration
     "BSW":      [1, 1, -1, 1, 0, 1, 0, -1, 0, 0, 1, 2, 1, 1, 1, 0, 1, -1, 1, 1, -1, 0, -1, 1, 2],
+    # DIE LINKE: Umverteilung, gegen Bezahlkarte, pro Mietendeckel
     "DIE LINKE": [2, -2, 2, -2, -1, 2, -2, 2, -2, 2, -1, 2, -2, 1, -2, 2, 1, 2, -1, 2, 1, 2, 2, -1, 2]
 }
 
@@ -52,7 +59,7 @@ DATA = [
     ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."]
 ]
 
-# --- SESSION STATE INITIALISIERUNG ---
+# --- SESSION STATE ---
 if 'order' not in st.session_state:
     st.session_state.order = list(range(len(DATA)))
     random.shuffle(st.session_state.order)
@@ -110,18 +117,9 @@ else:
             p_val = PARTY_DATA[party][q_idx]
             p_dir = 1 if p_val > 0 else (-1 if p_val < 0 else 0)
             
-            # Übereinstimmungspunkte
             pts = 2 - abs(c["dir"] - p_dir)
             s += pts * c["weight"]
             m += 2 * c["weight"]
         results[party] = round((s / m) * 100, 1)
     
-    for p, v in dict(sorted(results.items(), key=lambda x: x[1], reverse=True)).items():
-        render_bar(p, v, PARTY_COLORS[p])
-    
-    if st.button("🔄 Neustart (Neu gewürfelt)"):
-        st.session_state.order = list(range(len(DATA)))
-        random.shuffle(st.session_state.order)
-        st.session_state.step = 0
-        st.session_state.choices = []
-        st.rerun()
+    for p, v in dict(sorted(results.items(), key=lambda x: x[1], reverse=
