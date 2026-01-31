@@ -1,8 +1,8 @@
 import streamlit as st
 import random
 
-# --- KONFIGURATION ---
-st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="wide")
+# --- SETUP ---
+st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="centered")
 
 # --- PARTEIEN & FARBEN ---
 PARTIES = ["GRÜNE", "CDU", "SPD", "FDP", "AfD", "BSW", "DIE LINKE"]
@@ -11,7 +11,7 @@ PARTY_COLORS = {
     "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44", "DIE LINKE": "#BE3075"
 }
 
-# Skala: ++=2, +=1, o=0, -= -1, --= -2
+# --- PARTEI-DATEN (Exakt 25 Werte pro Liste) ---
 PARTY_DATA = {
     "GRÜNE":    [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 2],
     "CDU":      [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, 2, -1, 1, -1, 0, 2, -1],
@@ -62,15 +62,14 @@ def handle(q_idx, val):
     st.session_state.step += 1
 
 # --- BERECHNUNGSLOGIK ---
-"""
-PUNKTETABELLE (Smart-Match Polarisierungs-Edition)
-Nutzer-Wahl | Partei ++(+2) | Partei + (+1) | Partei o (0) | Partei - (-1) | Partei --(-2)
-++ (+2)     |      2       |       1       |      0       |       0       |      -1
-+  (+1)     |      2       |       2       |      1       |       0       |       0
-o   (0)     |      0       |       1       |      2       |       1       |       0
--  (-1)     |      0       |       0       |      1       |       2       |       2
--- (-2)     |     -1       |       0       |      0       |       1       |       2
-"""
+# PUNKTETABELLE (Smart-Match Polarisierungs-Edition)
+# Nutzer | P:+2 | P:+1 | P:0 | P:-1 | P:-2
+# ++(+2) |  2   |  1   |  0  |   0  |  -1
+# + (+1) |  2   |  2   |  1  |   0  |   0
+# o  (0) |  0   |  1   |  2  |   1  |   0
+# - (-1) |  0   |  0   |  1  |   2  |   2
+# --(-2) | -1   |  0   |  0  |   1  |   2
+
 def calculate_pts(u, p):
     if (u == 2 and p == -2) or (u == -2 and p == 2): return -1
     if u == 0:
@@ -93,6 +92,19 @@ def calculate_pts(u, p):
 def get_icon(val):
     mapping = {2: "✅✅", 1: "✅", 0: "⚪", -1: "❌", -2: "❌❌"}
     return mapping.get(val, "?")
+
+def render_bar(name, pct, color):
+    st.markdown(f"""
+    <div style="margin-top: 10px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+            <span style="font-weight:bold; color:{color};">{name}</span>
+            <span style="font-weight:bold;">{pct}%</span>
+        </div>
+        <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%;">
+            <div style="background:{color}; width:{pct}%; height:18px; border-radius:10px;"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- GUI ---
 st.title("🗳️ Wahl-O-Mat BW 2026")
@@ -124,7 +136,7 @@ if st.session_state.step < len(DATA):
 else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
-    st.write("Hier sind deine Übereinstimmungen. Nutze den **Button 'Details'** für den direkten Vergleich.")
+    st.write("Klicke auf 'Details einblenden' unter jedem Balken für den Vergleich.")
 
     # Ergebnisse berechnen
     final_results = []
@@ -141,23 +153,17 @@ else:
         pct = round((total_pts / max_pts) * 100, 1)
         final_results.append({"name": party, "pct": max(0, pct), "color": PARTY_COLORS[party], "details": details})
     
+    # Sortierte Anzeige
     sorted_results = sorted(final_results, key=lambda x: x["pct"], reverse=True)
     
-    # NEUES UI: Liste mit Popover-Buttons
     for entry in sorted_results:
-        # Layout: Name & Balken links, Button rechts
-        c1, c2 = st.columns([4, 1])
-        with c1:
-            st.markdown(f"### {entry['name']} — {entry['pct']}%")
-            st.progress(entry['pct'] / 100)
-        with c2:
-            st.write("##") # Kleiner Abstandshalter
-            # DAS IST DER NEUE BUTTON / DROPDOWN
-            with st.popover("📊 Details"):
-                st.subheader(f"Vergleich mit {entry['name']}")
-                st.table(entry["details"])
-        st.markdown("---")
-    
+        # 1. Der farbige Balken
+        render_bar(entry["name"], entry["pct"], entry["color"])
+        # 2. Das Dropdown (Expander) direkt darunter
+        with st.expander(f"Details für {entry['name']} einblenden"):
+            st.table(entry["details"])
+        st.write("") # Kleiner optischer Trenner
+
     if st.button("🔄 Test neu starten"):
         st.session_state.order = list(range(len(DATA)))
         random.shuffle(st.session_state.order)
