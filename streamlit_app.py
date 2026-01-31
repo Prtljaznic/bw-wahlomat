@@ -75,41 +75,27 @@ o   (0)     |      0       |       1       |      2       |       1       |     
 -----------------------------------------------------------------------
 """
 def calculate_pts(u, p):
-    # Polarisierungs-Strafe für die äußeren Felder
-    if (u == 2 and p == -2) or (u == -2 and p == 2):
-        return -1
-    
-    # Nutzer neutral
+    if (u == 2 and p == -2) or (u == -2 and p == 2): return -1
     if u == 0:
         if p == 0: return 2
-        if abs(p) == 1: return 1
-        return 0
-    
-    # Nutzer starke Zustimmung (Profil-Check)
+        return 1 if abs(p) == 1 else 0
     if u == 2:
         if p == 2: return 2
-        if p == 1: return 1
-        return 0
-    
-    # Nutzer moderate Zustimmung (Richtungs-Check)
+        return 1 if p == 1 else 0
     if u == 1:
         if p >= 1: return 2
-        if p == 0: return 1
-        return 0
-    
-    # Nutzer moderate Ablehnung (Richtungs-Check)
+        return 1 if p == 0 else 0
     if u == -1:
         if p <= -1: return 2
-        if p == 0: return 1
-        return 0
-    
-    # Nutzer starke Ablehnung (Profil-Check)
+        return 1 if p == 0 else 0
     if u == -2:
         if p == -2: return 2
-        if p == -1: return 1
-        return 0
-    
+        return 1 if p == -1 else 0
     return 0
+
+def get_icon(val):
+    mapping = {2: "✅✅", 1: "✅", 0: "⚪", -1: "❌", -2: "❌❌"}
+    return mapping.get(val, "?")
 
 def render_bar(name, pct, color):
     st.markdown(f"""<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;">
@@ -145,17 +131,39 @@ else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
     
-    final_scores = {}
+    # Ergebnisse berechnen
+    final_results = []
     for party in PARTIES:
-        s, m = 0, 0
+        total_pts, max_pts = 0, 0
+        details = []
         for c in st.session_state.choices:
             p_val = PARTY_DATA[party][c["index"]]
-            s += calculate_pts(c["val"], p_val)
-            m += 2 
-        final_scores[party] = max(0, round((s / m) * 100, 1))
+            pts = calculate_pts(c["val"], p_val)
+            total_pts += pts
+            max_pts += 2
+            details.append({
+                "These": DATA[c["index"]][0],
+                "Du": get_icon(c["val"]),
+                "Partei": get_icon(p_val),
+                "Punkte": pts
+            })
+        
+        pct = round((total_pts / max_pts) * 100, 1)
+        final_results.append({
+            "name": party,
+            "pct": max(0, pct),
+            "color": PARTY_COLORS[party],
+            "details": details
+        })
     
-    for p, v in dict(sorted(final_scores.items(), key=lambda x: x[1], reverse=True)).items():
-        render_bar(p, v, PARTY_COLORS[p])
+    # Sortiert anzeigen
+    sorted_results = sorted(final_results, key=lambda x: x["pct"], reverse=True)
+    
+    for entry in sorted_results:
+        render_bar(entry["name"], entry["pct"], entry["color"])
+        # Detail-Dropdown (Expander)
+        with st.expander(f"👁️ Detail-Vergleich: {entry['name']}"):
+            st.table(entry["details"])
     
     if st.button("🔄 Neustart"):
         st.session_state.order = list(range(len(DATA)))
