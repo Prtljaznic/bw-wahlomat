@@ -22,7 +22,7 @@ PARTY_DATA = {
     "DIE LINKE": [2, -2, 2, -2, -1, 2, -2, 2, -2, 2, -1, 2, -2, 1, -2, 2, 1, 2, -1, 2, 1, 2, 2, -1, 2]
 }
 
-# --- THESEN DATEN (VOLLSTÄNDIG) ---
+# --- THESEN DATEN (ORIGINALTEXTE) ---
 DATA = [
     ["G9-Rückkehr", "Die Umstellung auf das neunjährige Gymnasium soll sofort für alle Klassenstufen erfolgen.", "Baden-Württemberg stellt das Gymnasium aktuell wieder auf neun Jahre um. Da die Umstellung im Schuljahr 2025/26 primär für neue Jahrgänge startete, wird diskutiert, ob auch Schüler in höheren Klassenstufen sofort das Recht auf das zusätzliche Jahr erhalten sollten."],
     ["Verbrenner-Aus", "Baden-Württemberg soll sich dafür einsetzen, das EU-Verbot für Neuwagen mit Verbrennermotor ab 2035 zu stoppen.", "Die EU plant ein Verbot für neue Pkw mit Verbrennungsmotor ab 2035. Da Baden-Württemberg ein Zentrum der Automobilindustrie ist, steht die Frage im Raum, ob das Land auf eine Aufhebung oder Lockerung dieses Verbots hinwirken sollte."],
@@ -99,8 +99,8 @@ def get_icon(val):
 
 def render_bar_html(pct, color):
     return f"""
-    <div style="background:#f0f0f0; border-radius:5px; height:14px; width:100%; margin-top:5px; margin-bottom:5px;">
-        <div style="background:{color}; width:{pct}%; height:14px; border-radius:5px;"></div>
+    <div style="background:#f0f0f0; border-radius:5px; height:18px; width:100%; margin-top:10px;">
+        <div style="background:{color}; width:{pct}%; height:18px; border-radius:5px;"></div>
     </div>
     """
 
@@ -134,8 +134,10 @@ if st.session_state.step < len(DATA):
 else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
-    st.write("Klicke auf die Balken unten, um den detaillierten Vergleich zu sehen.")
+    st.write("Basierend auf deiner zufälligen Fragen-Reihenfolge:")
+    st.write("Klicke auf eine Partei, um Details und Balken zu sehen.")
 
+    # Ergebnisse berechnen
     final_results = []
     for party in PARTIES:
         total_pts, max_pts = 0, 0
@@ -160,15 +162,14 @@ else:
             "details": details
         })
     
+    # Sortierte Anzeige
     sorted_results = sorted(final_results, key=lambda x: x["pct"], reverse=True)
     
     for entry in sorted_results:
-        # Hier wird der Expander erzeugt, der wie ein Dropdown fungiert
-        label = f"{entry['name']} — {entry['pct']}%"
-        with st.expander(label):
-            # Balken direkt im Dropdown anzeigen
+        # Hier ist der Expander (das Dropdown), den du gesucht hast
+        with st.expander(f"{entry['name']} — {entry['pct']}% Übereinstimmung"):
             st.markdown(render_bar_html(entry['pct'], entry['color']), unsafe_allow_html=True)
-            # Vergleichstabelle
+            st.write("")
             st.table(entry["details"])
     
     st.write("---")
