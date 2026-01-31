@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 # --- KONFIGURATION ---
 st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="centered")
@@ -10,7 +11,6 @@ PARTY_COLORS = {
     "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44"
 }
 
-# Werte aus deiner Tabelle: ++=2, +=1, o=0, -= -1, --= -2
 PARTY_DATA = {
     "GRÜNE": [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 1],
     "CDU":   [1, 2, 2, 2, 1, 1, 2, -1, 2, 1, 2, -2, 2, -1, 2, 0, 1, -1, 1, -1, 1, -1, 0, 2, -1],
@@ -21,7 +21,6 @@ PARTY_DATA = {
 }
 
 # --- DATEN-STRUKTUR ---
-# [Überschrift, These, Ausführliche Erläuterung]
 DATA = [
     ["G9-Rückkehr", "Die Umstellung auf das neunjährige Gymnasium soll sofort für alle Klassenstufen erfolgen.", "Baden-Württemberg stellt das Gymnasium aktuell wieder auf neun Jahre um. Da die Umstellung im Schuljahr 2025/26 primär für neue Jahrgänge startete, wird diskutiert, ob auch Schüler in höheren Klassenstufen sofort das Recht auf das zusätzliche Jahr erhalten sollten."],
     ["Verbrenner-Aus", "Baden-Württemberg soll sich dafür einsetzen, das EU-Verbot für Neuwagen mit Verbrennermotor ab 2035 zu stoppen.", "Die EU plant ein Verbot für neue Pkw mit Verbrennungsmotor ab 2035. Da Baden-Württemberg ein Zentrum der Automobilindustrie ist, steht die Frage im Raum, ob das Land auf eine Aufhebung oder Lockerung dieses Verbots hinwirken sollte."],
@@ -50,12 +49,20 @@ DATA = [
     ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."]
 ]
 
-# --- SESSION STATE ---
-if 'step' not in st.session_state:
-    st.session_state.step, st.session_state.choices = 0, []
+# --- SESSION STATE INITIALISIERUNG ---
+if 'order' not in st.session_state:
+    # Erzeuge eine zufällige Reihenfolge der Indizes 0 bis 24
+    st.session_state.order = list(range(len(DATA)))
+    random.shuffle(st.session_state.order)
+    st.session_state.step = 0
+    st.session_state.choices = [] # Speichert {index, dir, weight}
 
-def handle(direction, weight):
-    st.session_state.choices.append({"dir": direction, "weight": weight})
+def handle(original_index, direction, weight):
+    st.session_state.choices.append({
+        "index": original_index, 
+        "dir": direction, 
+        "weight": weight
+    })
     st.session_state.step += 1
 
 def render_bar(name, pct, color):
@@ -67,8 +74,11 @@ def render_bar(name, pct, color):
 st.title("🗳️ Wahl-O-Mat BW 2026")
 
 if st.session_state.step < len(DATA):
-    h, t, i = DATA[st.session_state.step]
-    st.write(f"**These {st.session_state.step + 1} von 25**")
+    # Hole den aktuellen Index aus der gemischten Liste
+    current_idx = st.session_state.order[st.session_state.step]
+    h, t, i = DATA[current_idx]
+    
+    st.write(f"**These {st.session_state.step + 1} von 25** (Zufällige Auswahl)")
     st.progress(st.session_state.step / 25)
     
     st.markdown(f"## {h}")
@@ -80,8 +90,11 @@ if st.session_state.step < len(DATA):
     st.write("---")
     cols = st.columns(5)
     opts = [("✅✅", 1, 2), ("✅", 1, 1), ("⚪", 0, 1), ("❌", -1, 1), ("❌❌", -1, 2)]
+    
     for idx, (icon, dr, wt) in enumerate(opts):
-        if cols[idx].button(icon, use_container_width=True): handle(dr, wt)
+        if cols[idx].button(icon, use_container_width=True, key=f"btn_{st.session_state.step}_{idx}"): 
+            handle(current_idx, dr, wt)
+            st.rerun()
     
     st.caption("✅✅/❌❌: Thema zählt doppelt. | ⚪: Neutral/Egal")
     
@@ -91,12 +104,18 @@ if st.session_state.step < len(DATA):
             st.session_state.choices.pop()
             st.rerun()
 else:
-    st.header("Dein Ergebnis")
+    # KONFETTI REGEN
+    st.balloons()
+    
+    st.header("🎉 Dein Ergebnis")
+    st.write("Basierend auf deiner zufälligen Fragen-Reihenfolge:")
+    
     results = {}
     for party in PARTIES:
         s, m = 0, 0
-        for idx, c in enumerate(st.session_state.choices):
-            p_val = PARTY_DATA[party][idx]
+        for c in st.session_state.choices:
+            original_q_idx = c["index"]
+            p_val = PARTY_DATA[party][original_q_idx]
             p_dir = 1 if p_val > 0 else (-1 if p_val < 0 else 0)
             s += (2 - abs(c["dir"] - p_dir)) * c["weight"]
             m += 2 * c["weight"]
@@ -105,7 +124,10 @@ else:
     for p, v in dict(sorted(results.items(), key=lambda x: x[1], reverse=True)).items():
         render_bar(p, v, PARTY_COLORS[p])
     
-    if st.button("🔄 Neustart"):
+    if st.button("🔄 Test mit neuer Zufallsreihenfolge starten"):
+        # Reset der Session
+        st.session_state.order = list(range(len(DATA)))
+        random.shuffle(st.session_state.order)
         st.session_state.step = 0
         st.session_state.choices = []
         st.rerun()
