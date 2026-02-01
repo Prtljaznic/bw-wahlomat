@@ -11,7 +11,7 @@ PARTY_COLORS = {
     "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44", "DIE LINKE": "#BE3075"
 }
 
-# --- PARTEI-DATEN (Exakt 25 Werte pro Liste) ---
+# --- PARTEI-DATEN (Originallängen & korrigierte Positionen) ---
 PARTY_DATA = {
     "GRÜNE":    [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, 2, 2, -1, 2],
     "CDU":      [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, 2, -1, 1, -1, 0, 2, -1],
@@ -61,32 +61,35 @@ def handle(q_idx, val):
     st.session_state.choices.append({"index": q_idx, "val": val})
     st.session_state.step += 1
 
-# --- BERECHNUNGSLOGIK ---
-# PUNKTETABELLE (Smart-Match Polarisierungs-Edition)
+# --- BERECHNUNGSLOGIK (DEINE NEUE MATRIX) ---
 # Nutzer | P:+2 | P:+1 | P:0 | P:-1 | P:-2
-# ++(+2) |  2   |  1   |  0  |   0  |  -1
-# + (+1) |  2   |  2   |  1  |   0  |   0
-# o  (0) |  0   |  1   |  2  |   1  |   0
-# - (-1) |  0   |  0   |  1  |   2  |   2
-# --(-2) | -1   |  0   |  0  |   1  |   2
+# ++(+2) |  2   |  1   |  0  |  -1  |  -2
+# + (+1) |  1   |  1   |  1  |   0  |   0
+# o  (0) |  0   |  0   |  0  |   0  |   0
+# - (-1) |  0   |  0   |  1  |   1  |   1
+# --(-2) | -2   | -1   |  0  |   1  |   2
 
 def calculate_pts(u, p):
-    if (u == 2 and p == -2) or (u == -2 and p == 2): return -1
-    if u == 0:
-        if p == 0: return 2
-        return 1 if abs(p) == 1 else 0
-    if u == 2:
+    if u == 2: # Nutzer ++
         if p == 2: return 2
-        return 1 if p == 1 else 0
-    if u == 1:
-        if p >= 1: return 2
-        return 1 if p == 0 else 0
-    if u == -1:
-        if p <= -1: return 2
-        return 1 if p == 0 else 0
-    if u == -2:
+        if p == 1: return 1
+        if p == 0: return 0
+        if p == -1: return -1
+        if p == -2: return -2
+    if u == 1: # Nutzer +
+        if p >= 0: return 1
+        return 0
+    if u == 0: # Nutzer o
+        return 0
+    if u == -1: # Nutzer -
+        if p <= 0: return 1
+        return 0
+    if u == -2: # Nutzer --
         if p == -2: return 2
-        return 1 if p == -1 else 0
+        if p == -1: return 1
+        if p == 0: return 0
+        if p == 1: return -1
+        if p == 2: return -2
     return 0
 
 def get_icon(val):
@@ -126,7 +129,7 @@ if st.session_state.step < len(DATA):
             handle(idx, val)
             st.rerun()
     
-    st.caption("✅✅: Stimme voll und ganz zu | ✅: Stimme zu | ⚪: Ist mir egal | ❌: Stimme nicht zu | ❌❌: Stimme überhaupt nicht zu")
+    st.caption("✅✅: Voll zu | ✅: Zu | ⚪: Egal | ❌: Nicht zu | ❌❌: Gar nicht zu")
     
     if st.session_state.step > 0:
         if st.button("⬅️ Zurück"):
@@ -136,9 +139,8 @@ if st.session_state.step < len(DATA):
 else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
-    st.write("Klicke auf 'Details einblenden' unter jedem Balken für den Vergleich.")
+    st.write("Basierend auf deiner neuen Überzeugungs-Matrix.")
 
-    # Ergebnisse berechnen
     final_results = []
     for party in PARTIES:
         total_pts, max_pts = 0, 0
@@ -147,22 +149,20 @@ else:
             p_val = PARTY_DATA[party][c["index"]]
             pts = calculate_pts(c["val"], p_val)
             total_pts += pts
+            # Wir behalten 2 als Teiler für die Prozentrechnung bei
             max_pts += 2
             details.append({"These": DATA[c["index"]][0], "Du": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts})
         
         pct = round((total_pts / max_pts) * 100, 1)
         final_results.append({"name": party, "pct": max(0, pct), "color": PARTY_COLORS[party], "details": details})
     
-    # Sortierte Anzeige
     sorted_results = sorted(final_results, key=lambda x: x["pct"], reverse=True)
     
     for entry in sorted_results:
-        # 1. Der farbige Balken
         render_bar(entry["name"], entry["pct"], entry["color"])
-        # 2. Das Dropdown (Expander) direkt darunter
         with st.expander(f"Details für {entry['name']} einblenden"):
             st.table(entry["details"])
-        st.write("") # Kleiner optischer Trenner
+        st.write("")
 
     if st.button("🔄 Test neu starten"):
         st.session_state.order = list(range(len(DATA)))
