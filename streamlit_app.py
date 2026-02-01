@@ -148,22 +148,32 @@ else:
     for party in PARTIES:
         total_pts = 0
         details = []
+        conflicts = []
         for c in st.session_state.choices:
             p_val = PARTY_DATA[party][c["index"]]
             pts = calculate_pts(c["val"], p_val)
             total_pts += pts
-            details.append({"These": DATA[c["index"]][0], "Deine Wahl": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts})
+            
+            row = {"These": DATA[c["index"]][0], "Du": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts}
+            details.append(row)
+            
+            # Check für harte Konflikte (+2 vs -2)
+            if (c["val"] == 2 and p_val == -2) or (c["val"] == -2 and p_val == 2):
+                conflicts.append(row)
         
-        final_results.append({"name": party, "pts": total_pts, "color": PARTY_COLORS[party], "details": details})
+        final_results.append({"name": party, "pts": total_pts, "color": PARTY_COLORS[party], "details": details, "conflicts": conflicts})
     
-    # Sortierte Anzeige (nach Punkten)
     sorted_results = sorted(final_results, key=lambda x: x["pts"], reverse=True)
     
     for entry in sorted_results:
-        # Balken mit absoluten Punkten und Parteifarben
         render_bar(entry["name"], entry["pts"], entry["color"])
-        # Dropdown für die Tabelle
         with st.expander(f"Details für {entry['name']} einblenden"):
+            # Konflikt-Sektion (nur wenn vorhanden)
+            if entry["conflicts"]:
+                st.markdown("#### ⚡⚡ Konflikte")
+                st.table(entry["conflicts"])
+            
+            st.markdown("#### Alle Thesen")
             st.table(entry["details"])
         st.write("") 
 
