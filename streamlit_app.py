@@ -96,15 +96,17 @@ def get_icon(val):
     mapping = {2: "✅✅", 1: "✅", 0: "⚪", -1: "❌", -2: "❌❌"}
     return mapping.get(val, "?")
 
-def render_bar(name, pct, color):
+def render_bar(name, points, color):
+    # Maximum 50 Punkte (25 Thesen * 2 Punkte)
+    display_width = max(0, (points / 50) * 100)
     st.markdown(f"""
     <div style="margin-top: 10px;">
         <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
             <span style="font-weight:bold; color:{color};">{name}</span>
-            <span style="font-weight:bold;">{pct}%</span>
+            <span style="font-weight:bold;">{points} / 50 Punkte</span>
         </div>
         <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%;">
-            <div style="background:{color}; width:{pct}%; height:18px; border-radius:10px;"></div>
+            <div style="background:{color}; width:{display_width}%; height:18px; border-radius:10px;"></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -129,7 +131,7 @@ if st.session_state.step < len(DATA):
             handle(idx, val)
             st.rerun()
     
-    st.caption("✅✅: Voll zu | ✅: Zu | ⚪: Egal | ❌: Nicht zu | ❌❌: Gar nicht zu")
+    st.caption("✅✅: Stimme voll und ganz zu | ✅: Stimme zu | ⚪: Ist mir egal | ❌: Stimme nicht zu | ❌❌: Stimme überhaupt nicht zu")
     
     if st.session_state.step > 0:
         if st.button("⬅️ Zurück"):
@@ -139,30 +141,31 @@ if st.session_state.step < len(DATA):
 else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
-    st.write("Basierend auf deiner neuen Überzeugungs-Matrix.")
+    st.write("Klicke auf 'Details einblenden' unter jedem Balken für den Vergleich.")
 
+    # Ergebnisse berechnen
     final_results = []
     for party in PARTIES:
-        total_pts, max_pts = 0, 0
+        total_pts = 0
         details = []
         for c in st.session_state.choices:
             p_val = PARTY_DATA[party][c["index"]]
             pts = calculate_pts(c["val"], p_val)
             total_pts += pts
-            # Wir behalten 2 als Teiler für die Prozentrechnung bei
-            max_pts += 2
-            details.append({"These": DATA[c["index"]][0], "Du": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts})
+            details.append({"These": DATA[c["index"]][0], "Deine Wahl": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts})
         
-        pct = round((total_pts / max_pts) * 100, 1)
-        final_results.append({"name": party, "pct": max(0, pct), "color": PARTY_COLORS[party], "details": details})
+        final_results.append({"name": party, "pts": total_pts, "color": PARTY_COLORS[party], "details": details})
     
-    sorted_results = sorted(final_results, key=lambda x: x["pct"], reverse=True)
+    # Sortierte Anzeige (nach Punkten)
+    sorted_results = sorted(final_results, key=lambda x: x["pts"], reverse=True)
     
     for entry in sorted_results:
-        render_bar(entry["name"], entry["pct"], entry["color"])
+        # Balken mit absoluten Punkten und Parteifarben
+        render_bar(entry["name"], entry["pts"], entry["color"])
+        # Dropdown für die Tabelle
         with st.expander(f"Details für {entry['name']} einblenden"):
             st.table(entry["details"])
-        st.write("")
+        st.write("") 
 
     if st.button("🔄 Test neu starten"):
         st.session_state.order = list(range(len(DATA)))
