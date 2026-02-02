@@ -141,10 +141,12 @@ if st.session_state.step < len(DATA):
 else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
-    st.write("Klicke auf 'Details einblenden' unter jedem Balken für den Vergleich.")
-
-    # Ergebnisse berechnen
+    
+    # --- BERECHNUNG & PROZENT-LOGIK ---
     final_results = []
+    max_pts = len(DATA) * 2  # 50
+    min_pts = len(DATA) * -2 # -50
+
     for party in PARTIES:
         total_pts = 0
         details = []
@@ -156,26 +158,65 @@ else:
             
             row = {"These": DATA[c["index"]][0], "Du": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts}
             details.append(row)
-            
-            # Check für harte Konflikte (+2 vs -2)
             if (c["val"] == 2 and p_val == -2) or (c["val"] == -2 and p_val == 2):
                 conflicts.append(row)
         
-        final_results.append({"name": party, "pts": total_pts, "color": PARTY_COLORS[party], "details": details, "conflicts": conflicts})
+        # Prozentrechnung: Mapping von [-50, 50] auf [0, 100]
+        perc = ((total_pts - min_pts) / (max_pts - min_pts)) * 100
+        final_results.append({
+            "name": party, "pts": total_pts, "perc": round(perc, 1),
+            "color": PARTY_COLORS[party], "details": details, "conflicts": conflicts
+        })
     
     sorted_results = sorted(final_results, key=lambda x: x["pts"], reverse=True)
+
+    # --- TOP 3 PODIUM ---
+    st.subheader("🏆 Deine Top-Matches")
+    pod_cols = st.columns(3)
+    for i, entry in enumerate(sorted_results[:3]):
+        with pod_cols[i]:
+            st.markdown(f"""
+            <div style="background:{entry['color']}; padding:20px; border-radius:15px; text-align:center; color:white;">
+                <h1 style="margin:0; font-size:40px;">#{i+1}</h1>
+                <h2 style="margin:0;">{entry['name']}</h2>
+                <h3 style="margin:0;">{entry['perc']}%</h3>
+            </div>
+            """, unsafe_allow_html=True)
     
+    st.write("---")
+
+    # --- PDF EXPORT FUNKTION ---
+    from fpdf import FPDF
+    import base64
+
+    def create_pdf(results):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(190, 10, "Wahl-O-Mat BW 2026 - Dein Ergebnis", 0, 1, "C")
+        pdf.ln(10)
+        
+        for r in results:
+            pdf.set_font("Arial", "B", 12)
+            pdf.set_text_color(0, 0, 0)
+            pdf.cell(100, 10, f"{r['name']}: {r['perc']}% ({r['pts']} Pkt)", 0, 1)
+        
+        return pdf.output(dest="S").encode("latin-1")
+
+    pdf_data = create_pdf(sorted_results)
+    st.download_button(label="📥 Ergebnis als PDF speichern", data=pdf_data, file_name="wahlomat_ergebnis.pdf", mime="application/pdf")
+
+    # --- DETAILLISTE ---
+    st.subheader("📊 Alle Parteien im Detail")
     for entry in sorted_results:
-        render_bar(entry["name"], entry["pts"], entry["color"])
+        # Balken mit Prozentangabe
+        render_bar(f"{entry['name']} ({entry['perc']}%)", entry['pts'], entry['color'])
         with st.expander(f"Details für {entry['name']} einblenden"):
-            # Konflikt-Sektion (nur wenn vorhanden)
             if entry["conflicts"]:
-                st.markdown("#### ⚡⚡ Konflikte")
+                st.markdown("#### ⚡⚡ Harte Konflikte")
                 st.table(entry["conflicts"])
-            
             st.markdown("#### Alle Thesen")
             st.table(entry["details"])
-        st.write("") 
 
     if st.button("🔄 Test neu starten"):
         st.session_state.order = list(range(len(DATA)))
