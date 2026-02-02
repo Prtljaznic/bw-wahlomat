@@ -122,16 +122,16 @@ def get_icon(val):
     return mapping.get(val, "?")
 
 def render_bar(name, points, color):
-    max_possible = 150
-    display_width = min(100, max(0, (points / max_possible) * 100))
+    # Skalierung auf 150 Punkte (25 Thesen * max 6 Punkte)
+    display_width = min(100, max(0, (points / 150) * 100))
     st.markdown(f"""
     <div style="margin-top: 10px;">
         <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
             <span style="font-weight:bold; color:{color};">{name}</span>
-            <span style="font-weight:bold;">{points} / {max_possible} Punkte</span>
+            <span style="font-weight:bold;">{points} / 150 Pkt</span>
         </div>
         <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%;">
-            <div style="background:{color}; width:{display_width}%; height:18px; border-radius:10px; transition: width 0.5s;"></div>
+            <div style="background:{color}; width:{display_width}%; height:18px; border-radius:10px; transition: width 0.8s ease-in-out;"></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -166,8 +166,6 @@ else:
     st.header("🎉 Dein Ergebnis")
     
     final_results = []
-    max_pts = 150 # 25 * 6
-
     for party in PARTIES:
         total_pts = 0
         details, conflicts = [], []
@@ -178,10 +176,10 @@ else:
             
             row = {"These": DATA[c["index"]][0], "Du": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts}
             details.append(row)
-            if pts == 0 and abs(c["val"]) == 2: # Highlighte harte Konflikte (0 Pkt bei starker Meinung)
+            if pts == 0 and abs(c["val"]) == 2:
                 conflicts.append(row)
         
-        perc = (total_pts / max_pts) * 100
+        perc = (total_pts / 150) * 100
         final_results.append({
             "name": party, "pts": total_pts, "perc": round(perc, 1),
             "color": PARTY_COLORS[party], "details": details, "conflicts": conflicts
@@ -189,42 +187,31 @@ else:
     
     sorted_results = sorted(final_results, key=lambda x: x["pts"], reverse=True)
 
-    # Podium
+    # Top 3 Podium
     st.subheader("🏆 Deine Top-Matches")
     pod_cols = st.columns(3)
     for i, entry in enumerate(sorted_results[:3]):
         with pod_cols[i]:
-            st.markdown(f"""<div style="background:{entry['color']}; padding:20px; border-radius:15px; text-align:center; color:white;">
-                <h1 style="margin:0;">#{i+1}</h1><h2>{entry['name']}</h2><h3>{entry['perc']}%</h3></div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style="background:{entry['color']}; padding:20px; border-radius:15px; text-align:center; color:white;">
+                <h1 style="margin:0;">#{i+1}</h1>
+                <h2 style="margin:0;">{entry['name']}</h2>
+                <h3 style="margin:0;">{entry['perc']}%</h3>
+            </div>
+            """, unsafe_allow_html=True)
     
     st.write("---")
 
-    # PDF Fix: Latin-1 handling für Umlaute
-    def create_pdf(results):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(190, 10, "Dein Wahl-O-Mat BW 2026 Ergebnis", 0, 1, "C")
-        pdf.ln(10)
-        for r in results:
-            pdf.set_font("Helvetica", "", 12)
-            # Umlaute sicher kodieren
-            text = f"{r['name']}: {r['perc']}% ({r['pts']} Pkt)".encode('latin-1', 'replace').decode('latin-1')
-            pdf.cell(100, 10, text, 0, 1)
-        return pdf.output(dest="S").encode("latin-1")
-
-    st.download_button("📥 PDF herunterladen", data=create_pdf(sorted_results), file_name="ergebnis.pdf")
-
-    # Details
+    # Ergebnisliste
     st.subheader("📊 Alle Parteien im Detail")
     for entry in sorted_results:
         render_bar(f"{entry['name']} ({entry['perc']}%)", entry['pts'], entry['color'])
-        with st.expander(f"Details anzeigen"):
+        with st.expander(f"Vergleich einblenden"):
             if entry["conflicts"]:
-                st.warning("⚡ Harte Konflikte gefunden")
+                st.warning("⚡ Harte Gegensätze bei deinen Kern-Themen")
                 st.table(entry["conflicts"])
             st.table(entry["details"])
 
-    if st.button("🔄 Neustart"):
+    if st.button("🔄 Test neu starten"):
         st.session_state.step, st.session_state.choices = 0, []
         st.rerun()
