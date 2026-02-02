@@ -49,7 +49,7 @@ DATA = [
     ["Studiengebühren", "Die Gebühren für Studierende aus Nicht-EU-Ländern sollen wieder abgeschafft werden.", "Derzeit zahlen Studierende von außerhalb der EU in BW 1.500 Euro Gebühren pro Semester. Es wird diskutiert, ob diese Gebühren abgeschafft werden sollten, um international attraktiver für Fachkräfte zu werden."],
     ["Solarpflicht", "Die Photovoltaik-Pflicht soll auch auf die Sanierung bestehender Wohnhäuser ausgeweitet werden.", "Während Photovoltaik bei Neubauten Pflicht ist, wird nun darüber gestritten, ob Hausbesitzer auch bei der Sanierung alter Dächer verpflichtet werden sollen, Solarpanels zu installieren."],
     ["Waffenverbotszonen", "Kommunen sollen leichter Messer- und Waffenverbotszonen in Innenstädten einrichten dürfen.", "Um Gewaltkriminalität vorzubeugen, könnten Kommunen Zonen einrichten, in denen das Mitführen von Messern und Waffen generell verboten ist. Es geht um die Frage, ob die Hürden für solche Zonen gesenkt werden sollen."],
-    ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."]
+    ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."],
     ["Schuldenbremse", "Das Land soll sich für eine Lockerung der Schuldenbremse einsetzen, um Kredite für Investitionen (z. B. Schulen, Schienen) zu ermöglichen.", "Die Schuldenbremse begrenzt die Kreditaufnahme. Befürworter einer Lockerung wollen so mehr Geld für Infrastruktur und Klimaschutz bereitstellen, Kritiker warnen vor einer zu hohen Belastung künftiger Generationen."],
     ["Mobilitätsgarantie", "In ganz BW soll von 5 bis 24 Uhr eine Mobilitätsgarantie gelten (stündlicher ÖPNV-Anschluss für jeden Ort).", "Jedes Dorf soll mindestens einmal pro Stunde an den Nahverkehr angebunden sein, notfalls durch Rufbusse oder Sammeltaxis."],
     ["Informatik-Pflicht", "Informatik soll an allen weiterführenden Schulen ab der 5. Klasse zum verpflichtenden Kernfach werden.", "Digitale Bildung soll früher und verbindlicher im Lehrplan verankert werden, um Schüler auf die Anforderungen der modernen Arbeitswelt vorzubereiten."],
@@ -148,8 +148,11 @@ if st.session_state.step < len(DATA):
     idx = st.session_state.order[st.session_state.step]
     h, t, i = DATA[idx][0], DATA[idx][1], DATA[idx][2]
     
-    st.write(f"**These {st.session_state.step + 1} von 25**")
-    st.progress(st.session_state.step / 25)
+    num_theses = len(DATA)
+    
+    st.write(f"**These {st.session_state.step + 1} von {num_theses}**")
+    st.progress(st.session_state.step / num_theses) # Nutzt den dynamischen Wert
+    
     st.markdown(f"## {h}\n#### {t}")
     with st.expander("ℹ️ Erläuterung"): st.write(i)
     
