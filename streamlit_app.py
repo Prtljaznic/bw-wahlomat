@@ -13,14 +13,14 @@ PARTY_COLORS = {
 }
 
 # --- PARTEI-DATEN ---
-PARTY_DATA = {
-    "GRÜNE":    [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, -2, 2, -1, 2],
-    "CDU":      [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, -2, -1, 1, -1, 0, 2, -1],
-    "SPD":      [2, 0, 1, 1, 0, 2, 1, -1, 0, 2, 1, 2, -2, 2, 2, 1, 2, -1, 1, 2, 1, 2, 1, 1, 2],
-    "FDP":      [1, 2, -1, 2, 2, 1, 1, -1, 2, 2, 1, -2, 2, -2, 2, -1, 2, -1, 2, -1, 1, 2, -2, 1, -2],
-    "AfD":      [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 2, 0, -2, -2, 2, 0],
-    "BSW":      [1, 1, -1, 1, 0, 1, 0, -1, 0, 0, 1, 2, 1, 1, 1, 0, 1, -1, 1, 1, -1, 0, -1, 1, 2],
-    "DIE LINKE": [2, -2, 2, -2, -1, 2, -2, 2, -2, 2, -1, 2, -2, 1, -2, 2, 1, 2, -1, 2, 1, 2, 2, -1, 2]
+PARTY_DATA = {    
+    "GRÜNE":    [-1, -2, 2, 1, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, -2, 2, 1, 1],    # GRÜNE: Verteidigen ihren Kurs (Grundsteuer, Gebühren), pro Klimaschutz, skeptisch bei G9-Hektik.  
+    "CDU":      [1, 2, 1, 2, 2, 1, 2, -1, 2, 1, 2, -2, 2, 1, 2, 0, 2, -1, -2, 1, 2, -2, 1, 2, -1],       # CDU: Unter Hagel konservativer (Gender, Sicherheit), pro G9, pro Verbrenner, verteidigt aber Koalitionsprojekte.
+    "SPD":      [2, 0, 1, 1, 1, 2, 1, 1, -1, 2, 1, 2, -2, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 2],           # SPD: Sozialer Fokus, will Grundsteuer-Modell des Bundes, pro G9, gegen Gender-Verbot.
+    "FDP":      [1, 2, -1, 2, 2, 1, 1, -2, 2, 2, 2, -2, 1, -2, 2, -1, 2, -2, 2, -1, 2, 1, -2, 1, -2],    # FDP: Wirtschaftsliberal, Technologieoffen, scharfe Kritik an der Landes-Grundsteuer.    
+    "AfD":      [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 2, 0, 2, -2, 2, 0],     # AfD: Fundamentalopposition, sehr starke Positionen gegen Windkraft, Gender und Migration.
+    "BSW":      [1, 1, -1, 2, 0, 1, 1, 0, 0, 0, 1, 2, 2, 1, 1, 0, 2, -1, 1, 2, -1, 1, -1, 1, 2],         # BSW: Links-Konservativ. Sozialpolitik wie Linke, Gesellschaftspolitik eher wie AfD/CDU.
+    "DIE LINKE": [2, -2, 2, -2, 0, 2, -2, 2, -2, 2, -1, 2, -2, 2, -1, 2, 1, 2, 2, 2, 1, 2, 2, -1, 2]     # DIE LINKE: Klassisch Links. Staatliche Eingriffe, Umverteilung, gegen Studiengebühren.
 }
 
 # --- THESEN DATEN (ORIGINALTEXTE UNGEKÜRZT) ---
