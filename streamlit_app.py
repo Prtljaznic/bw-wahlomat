@@ -61,7 +61,31 @@ def handle(q_idx, val):
     st.session_state.choices.append({"index": q_idx, "val": val})
     st.session_state.step += 1
 
-# --- BERECHNUNGSLOGIK (DEINE NEUE MATRIX) ---
+# Neuer Bewertungsfunktion
+def calculate_pts(u, p):
+    if u == 0: return 0  # Neutraler Nutzer = keine Punkte-Basis
+    
+    # Wir berechnen den Abstand auf einer Skala von 0 bis 4
+    # (z.B. von ++ [2] bis -- [-2] ist der Abstand 4)
+    distance = abs(u - p)
+    
+    # Starke Meinung des Nutzers (++ oder --)
+    if abs(u) == 2:
+        mapping = {0: 6, 1: 4, 2: 2, 3: 1, 4: 0}
+        return mapping.get(distance, 0)
+    
+    # Normale Meinung des Nutzers (+ oder -)
+    if abs(u) == 1:
+        mapping = {0: 3, 1: 4, 2: 2, 3: 0, 4: 0} 
+        # Hinweis: Bei Abstand 1 (u=+1, p=+2) gibt es 4 Pkt, 
+        # weil die Partei "überzeugt" ist, was der Nutzer nur "gut" findet.
+        return mapping.get(distance, 0)
+    
+    return 0
+
+# Alte Funktion anhand folgender Matrix
+
+# --- BERECHNUNGSLOGIK ---
 # Nutzer | P:+2 | P:+1 | P:0 | P:-1 | P:-2
 # ++(+2) |  2   |  1   |  0  |  -1  |  -2
 # + (+1) |  1   |  1   |  1  |   0  |   0
@@ -69,7 +93,7 @@ def handle(q_idx, val):
 # - (-1) |  0   |  0   |  1  |   1  |   1
 # --(-2) | -2   | -1   |  0  |   1  |   2
 
-def calculate_pts(u, p):
+def calculate_pts_old(u, p):
     if u == 2: # Nutzer ++
         if p == 2: return 2
         if p == 1: return 1
@@ -144,8 +168,8 @@ else:
     
     # --- BERECHNUNG & PROZENT-LOGIK ---
     final_results = []
-    max_pts = len(DATA) * 2  # 50
-    min_pts = len(DATA) * -2 # -50
+    max_pts = len(DATA) * 6  # 150
+    min_pts = 0
 
     for party in PARTIES:
         total_pts = 0
