@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+from fpdf import FPDF
 
 # --- SETUP ---
 st.set_page_config(page_title="Wahl-O-Mat BW 2026", page_icon="🗳️", layout="centered")
@@ -11,7 +12,7 @@ PARTY_COLORS = {
     "FDP": "#FFED00", "AfD": "#009EE0", "BSW": "#7E1C44", "DIE LINKE": "#BE3075"
 }
 
-# --- PARTEI-DATEN (Originallängen & korrigierte Positionen) ---
+# --- PARTEI-DATEN ---
 PARTY_DATA = {
     "GRÜNE":    [0, -2, 2, 0, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, -2, 2, -1, 2],
     "CDU":      [1, 2, 1, 2, 2, 1, 2, -2, 2, -1, 2, -2, 2, -1, 2, 0, 1, -2, -2, -1, 1, -1, 0, 2, -1],
@@ -121,16 +122,16 @@ def get_icon(val):
     return mapping.get(val, "?")
 
 def render_bar(name, points, color):
-    # Maximum 50 Punkte (25 Thesen * 2 Punkte)
-    display_width = max(0, (points / 50) * 100)
+    max_possible = 150
+    display_width = min(100, max(0, (points / max_possible) * 100))
     st.markdown(f"""
     <div style="margin-top: 10px;">
         <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
             <span style="font-weight:bold; color:{color};">{name}</span>
-            <span style="font-weight:bold;">{points} / 50 Punkte</span>
+            <span style="font-weight:bold;">{points} / {max_possible} Punkte</span>
         </div>
         <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%;">
-            <div style="background:{color}; width:{display_width}%; height:18px; border-radius:10px;"></div>
+            <div style="background:{color}; width:{display_width}%; height:18px; border-radius:10px; transition: width 0.5s;"></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -155,8 +156,6 @@ if st.session_state.step < len(DATA):
             handle(idx, val)
             st.rerun()
     
-    st.caption("✅✅: Stimme voll und ganz zu | ✅: Stimme zu | ⚪: Ist mir egal | ❌: Stimme nicht zu | ❌❌: Stimme überhaupt nicht zu")
-    
     if st.session_state.step > 0:
         if st.button("⬅️ Zurück"):
             st.session_state.step -= 1
@@ -166,15 +165,12 @@ else:
     st.balloons()
     st.header("🎉 Dein Ergebnis")
     
-    # --- BERECHNUNG & PROZENT-LOGIK ---
     final_results = []
-    max_pts = len(DATA) * 6  # 150
-    min_pts = 0
+    max_pts = 150 # 25 * 6
 
     for party in PARTIES:
         total_pts = 0
-        details = []
-        conflicts = []
+        details, conflicts = [], []
         for c in st.session_state.choices:
             p_val = PARTY_DATA[party][c["index"]]
             pts = calculate_pts(c["val"], p_val)
@@ -182,11 +178,10 @@ else:
             
             row = {"These": DATA[c["index"]][0], "Du": get_icon(c["val"]), "Partei": get_icon(p_val), "Punkte": pts}
             details.append(row)
-            if (c["val"] == 2 and p_val == -2) or (c["val"] == -2 and p_val == 2):
+            if pts == 0 and abs(c["val"]) == 2: # Highlighte harte Konflikte (0 Pkt bei starker Meinung)
                 conflicts.append(row)
         
-        # Prozentrechnung: Mapping von [-50, 50] auf [0, 100]
-        perc = ((total_pts - min_pts) / (max_pts - min_pts)) * 100
+        perc = (total_pts / max_pts) * 100
         final_results.append({
             "name": party, "pts": total_pts, "perc": round(perc, 1),
             "color": PARTY_COLORS[party], "details": details, "conflicts": conflicts
@@ -194,56 +189,42 @@ else:
     
     sorted_results = sorted(final_results, key=lambda x: x["pts"], reverse=True)
 
-    # --- TOP 3 PODIUM ---
+    # Podium
     st.subheader("🏆 Deine Top-Matches")
     pod_cols = st.columns(3)
     for i, entry in enumerate(sorted_results[:3]):
         with pod_cols[i]:
-            st.markdown(f"""
-            <div style="background:{entry['color']}; padding:20px; border-radius:15px; text-align:center; color:white;">
-                <h1 style="margin:0; font-size:40px;">#{i+1}</h1>
-                <h2 style="margin:0;">{entry['name']}</h2>
-                <h3 style="margin:0;">{entry['perc']}%</h3>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"""<div style="background:{entry['color']}; padding:20px; border-radius:15px; text-align:center; color:white;">
+                <h1 style="margin:0;">#{i+1}</h1><h2>{entry['name']}</h2><h3>{entry['perc']}%</h3></div>""", unsafe_allow_html=True)
     
     st.write("---")
 
-    # --- PDF EXPORT FUNKTION ---
-    from fpdf import FPDF
-    import base64
-
+    # PDF Fix: Latin-1 handling für Umlaute
     def create_pdf(results):
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", "B", 16)
-        pdf.cell(190, 10, "Wahl-O-Mat BW 2026 - Dein Ergebnis", 0, 1, "C")
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(190, 10, "Dein Wahl-O-Mat BW 2026 Ergebnis", 0, 1, "C")
         pdf.ln(10)
-        
         for r in results:
-            pdf.set_font("Arial", "B", 12)
-            pdf.set_text_color(0, 0, 0)
-            pdf.cell(100, 10, f"{r['name']}: {r['perc']}% ({r['pts']} Pkt)", 0, 1)
-        
+            pdf.set_font("Helvetica", "", 12)
+            # Umlaute sicher kodieren
+            text = f"{r['name']}: {r['perc']}% ({r['pts']} Pkt)".encode('latin-1', 'replace').decode('latin-1')
+            pdf.cell(100, 10, text, 0, 1)
         return pdf.output(dest="S").encode("latin-1")
 
-    pdf_data = create_pdf(sorted_results)
-    st.download_button(label="📥 Ergebnis als PDF speichern", data=pdf_data, file_name="wahlomat_ergebnis.pdf", mime="application/pdf")
+    st.download_button("📥 PDF herunterladen", data=create_pdf(sorted_results), file_name="ergebnis.pdf")
 
-    # --- DETAILLISTE ---
+    # Details
     st.subheader("📊 Alle Parteien im Detail")
     for entry in sorted_results:
-        # Balken mit Prozentangabe
         render_bar(f"{entry['name']} ({entry['perc']}%)", entry['pts'], entry['color'])
-        with st.expander(f"Details für {entry['name']} einblenden"):
+        with st.expander(f"Details anzeigen"):
             if entry["conflicts"]:
-                st.markdown("#### ⚡⚡ Harte Konflikte")
+                st.warning("⚡ Harte Konflikte gefunden")
                 st.table(entry["conflicts"])
-            st.markdown("#### Alle Thesen")
             st.table(entry["details"])
 
-    if st.button("🔄 Test neu starten"):
-        st.session_state.order = list(range(len(DATA)))
-        random.shuffle(st.session_state.order)
+    if st.button("🔄 Neustart"):
         st.session_state.step, st.session_state.choices = 0, []
         st.rerun()
