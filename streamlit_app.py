@@ -14,16 +14,16 @@ PARTY_COLORS = {
 
 # --- PARTEI-DATEN ---
 PARTY_DATA = {    
-    "GRÜNE":    [-1, -2, 2, 1, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, -2, 2, 1, 1],    # GRÜNE: Verteidigen ihren Kurs (Grundsteuer, Gebühren), pro Klimaschutz, skeptisch bei G9-Hektik.  
-    "CDU":      [1, 2, 1, 2, 2, 1, 2, -1, 2, 1, 2, -2, 2, 1, 2, 0, 2, -1, -2, 1, 2, -2, 1, 2, -1],       # CDU: Unter Hagel konservativer (Gender, Sicherheit), pro G9, pro Verbrenner, verteidigt aber Koalitionsprojekte.
-    "SPD":      [2, 0, 1, 1, 1, 2, 1, 1, -1, 2, 1, 2, -2, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 2],           # SPD: Sozialer Fokus, will Grundsteuer-Modell des Bundes, pro G9, gegen Gender-Verbot.
-    "FDP":      [1, 2, -1, 2, 2, 1, 1, -2, 2, 2, 2, -2, 1, -2, 2, -1, 2, -2, 2, -1, 2, 1, -2, 1, -2],    # FDP: Wirtschaftsliberal, Technologieoffen, scharfe Kritik an der Landes-Grundsteuer.    
-    "AfD":      [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 2, 0, 2, -2, 2, 0],     # AfD: Fundamentalopposition, sehr starke Positionen gegen Windkraft, Gender und Migration.
-    "BSW":      [1, 1, -1, 2, 0, 1, 1, 0, 0, 0, 1, 2, 2, 1, 1, 0, 2, -1, 1, 2, -1, 1, -1, 1, 2],         # BSW: Links-Konservativ. Sozialpolitik wie Linke, Gesellschaftspolitik eher wie AfD/CDU.
-    "DIE LINKE": [2, -2, 2, -2, 0, 2, -2, 2, -2, 2, -1, 2, -2, 2, -1, 2, 1, 2, 2, 2, 1, 2, 2, -1, 2]     # DIE LINKE: Klassisch Links. Staatliche Eingriffe, Umverteilung, gegen Studiengebühren.
+    "GRÜNE":    [-1, -2, 2, 1, -1, 1, -1, 2, -2, 2, 0, 1, -2, 1, -1, 2, 1, 2, -2, 0, 1, -2, 2, 1, 1, 2, 2, 0, -2, 2],    # GRÜNE: Verteidigen ihren Kurs (Grundsteuer, Gebühren), pro Klimaschutz, skeptisch bei G9-Hektik.  
+    "CDU":      [1, 2, 1, 2, 2, 1, 2, -1, 2, 1, 2, -2, 2, 1, 2, 0, 2, -1, -2, 1, 2, -2, 1, 2, -1, -2, 0, 2, 2, -2],       # CDU: Unter Hagel konservativer (Gender, Sicherheit), pro G9, pro Verbrenner, verteidigt aber Koalitionsprojekte.
+    "SPD":      [2, 0, 1, 1, 1, 2, 1, 1, -1, 2, 1, 2, -2, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 2,  2, 2, 1, -1, 1],           # SPD: Sozialer Fokus, will Grundsteuer-Modell des Bundes, pro G9, gegen Gender-Verbot.
+    "FDP":      [1, 2, -1, 2, 2, 1, 1, -2, 2, 2, 2, -2, 1, -2, 2, -1, 2, -2, 2, -1, 2, 1, -2, 1, -2, -2, -1, 2, 2, 1],    # FDP: Wirtschaftsliberal, Technologieoffen, scharfe Kritik an der Landes-Grundsteuer.    
+    "AfD":      [1, 2, -2, 2, 2, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 1, -2, 2, 2, 0, 2, -2, 2, 0, -1, -2, 0, 2, -2],     # AfD: Fundamentalopposition, sehr starke Positionen gegen Windkraft, Gender und Migration.
+    "BSW":      [1, 1, -1, 2, 0, 1, 1, 0, 0, 0, 1, 2, 2, 1, 1, 0, 2, -1, 1, 2, -1, 1, -1, 1, 2,  1, 1, 0, 1, -1],         # BSW: Links-Konservativ. Sozialpolitik wie Linke, Gesellschaftspolitik eher wie AfD/CDU.
+    "DIE LINKE": [2, -2, 2, -2, 0, 2, -2, 2, -2, 2, -1, 2, -2, 2, -1, 2, 1, 2, 2, 2, 1, 2, 2, -1, 2,  2, 2, 0, -2, 2]     # DIE LINKE: Klassisch Links. Staatliche Eingriffe, Umverteilung, gegen Studiengebühren.
 }
 
-# --- THESEN DATEN (ORIGINALTEXTE UNGEKÜRZT) ---
+# --- THESEN DATEN ---
 DATA = [
     ["G9-Rückkehr", "Die Umstellung auf das neunjährige Gymnasium soll sofort für alle Klassenstufen erfolgen.", "Baden-Württemberg stellt das Gymnasium aktuell wieder auf neun Jahre um. Da die Umstellung im Schuljahr 2025/26 primär für neue Jahrgänge startete, wird diskutiert, ob auch Schüler in höheren Klassenstufen sofort das Recht auf das zusätzliche Jahr erhalten sollten."],
     ["Verbrenner-Aus", "Baden-Württemberg soll sich dafür einsetzen, das EU-Verbot für Neuwagen mit Verbrennermotor ab 2035 zu stoppen.", "Die EU plant ein Verbot für neue Pkw mit Verbrennungsmotor ab 2035. Da Baden-Württemberg ein Zentrum der Automobilindustrie ist, steht die Frage im Raum, ob das Land auf eine Aufhebung oder Lockerung dieses Verbots hinwirken sollte."],
@@ -50,6 +50,11 @@ DATA = [
     ["Solarpflicht", "Die Photovoltaik-Pflicht soll auch auf die Sanierung bestehender Wohnhäuser ausgeweitet werden.", "Während Photovoltaik bei Neubauten Pflicht ist, wird nun darüber gestritten, ob Hausbesitzer auch bei der Sanierung alter Dächer verpflichtet werden sollen, Solarpanels zu installieren."],
     ["Waffenverbotszonen", "Kommunen sollen leichter Messer- und Waffenverbotszonen in Innenstädten einrichten dürfen.", "Um Gewaltkriminalität vorzubeugen, könnten Kommunen Zonen einrichten, in denen das Mitführen von Messern und Waffen generell verboten ist. Es geht um die Frage, ob die Hürden für solche Zonen gesenkt werden sollen."],
     ["Gratis Mittagessen", "Das Land soll die Kosten für das Mittagessen in allen Kitas und Grundschulen komplett übernehmen.", "Die Mittagsverpflegung in Kitas und Schulen ist oft kostenpflichtig. Es steht zur Debatte, ob das Land die Kosten für eine warme Mahlzeit für alle Kinder komplett übernehmen sollte."]
+    ["Schuldenbremse", "Das Land soll sich für eine Lockerung der Schuldenbremse einsetzen, um Kredite für Investitionen (z. B. Schulen, Schienen) zu ermöglichen.", "Die Schuldenbremse begrenzt die Kreditaufnahme. Befürworter einer Lockerung wollen so mehr Geld für Infrastruktur und Klimaschutz bereitstellen, Kritiker warnen vor einer zu hohen Belastung künftiger Generationen."],
+    ["Mobilitätsgarantie", "In ganz BW soll von 5 bis 24 Uhr eine Mobilitätsgarantie gelten (stündlicher ÖPNV-Anschluss für jeden Ort).", "Jedes Dorf soll mindestens einmal pro Stunde an den Nahverkehr angebunden sein, notfalls durch Rufbusse oder Sammeltaxis."],
+    ["Informatik-Pflicht", "Informatik soll an allen weiterführenden Schulen ab der 5. Klasse zum verpflichtenden Kernfach werden.", "Digitale Bildung soll früher und verbindlicher im Lehrplan verankert werden, um Schüler auf die Anforderungen der modernen Arbeitswelt vorzubereiten."],
+    ["Abschiebehaft", "Das Land soll am Flughafen Stuttgart eine eigene Einrichtung für Abschiebehaft bauen.", "Eine solche Einrichtung soll die Durchführung von Rückführungen organisatorisch vereinfachen und sicherstellen, dass ausreisepflichtige Personen vor dem Flug greifbar sind."],
+    ["Cannabis-Modellregionen", "Baden-Württemberg soll wissenschaftlich begleitete Modellprojekte zur kontrollierten Abgabe von Cannabis zulassen.", "Nach der Teil-Legalisierung des Bundes können Länder Modellregionen für den kommerziellen Verkauf in lizenzierten Fachgeschäften ermöglichen."]
 ]
 
 # --- SESSION STATE ---
@@ -122,13 +127,13 @@ def get_icon(val):
     return mapping.get(val, "?")
 
 def render_bar(name, points, color):
-    # Skalierung auf 150 Punkte (25 Thesen * max 6 Punkte)
-    display_width = min(100, max(0, (points / 150) * 100))
+    # Skalierung auf 180 Punkte (30 Thesen * max 6 Punkte)
+    display_width = min(100, max(0, (points / 180) * 100))
     st.markdown(f"""
     <div style="margin-top: 10px;">
         <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
             <span style="font-weight:bold; color:{color};">{name}</span>
-            <span style="font-weight:bold;">{points} / 150 Pkt</span>
+            <span style="font-weight:bold;">{points} / 180     Pkt</span>
         </div>
         <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%;">
             <div style="background:{color}; width:{display_width}%; height:18px; border-radius:10px; transition: width 0.8s ease-in-out;"></div>
